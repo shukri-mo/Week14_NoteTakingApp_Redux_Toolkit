@@ -3,15 +3,17 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save } from "lucide-react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useState,useEffect,useRef } from "react";
 import { noteSchema } from "../schema/notes";
-import { useDispatch } from "react-redux";
-import { createNote} from "../Store/noteSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { createNote,resetCreateReducer} from "../Store/noteSlice";
 
 
 const CreateNoteForm = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const loading=useSelector(state=>state.notes.loading)
+
+  const createStatus=useSelector(state=>state.notes.createStatus)
   const navigate = useNavigate();
 const dispatch=useDispatch()
   const {
@@ -29,9 +31,21 @@ const dispatch=useDispatch()
 
   const submit= (data)=> {
    dispatch(createNote(data))
-   reset();
+ reset();
   };
+ 
+const hasNavigated = useRef(false);
 
+useEffect(() => {
+  if (createStatus === 'success' && !hasNavigated.current) {
+    reset();
+    navigate("/notes");
+    dispatch(resetCreateReducer());
+    hasNavigated.current = true;
+  } else if (createStatus !== 'success') {
+    hasNavigated.current = false; // reset flag when status changes away from success
+  }
+}, [createStatus, navigate, dispatch]);
   return (
     <form
       className="bg-white p-6 rounded-lg shadow-sm max-w-2xl mx-auto"
@@ -85,11 +99,11 @@ const dispatch=useDispatch()
 
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={loading}
         className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70"
       >
         <Save size={18} />
-        <span>{isSubmitting ? "Saving..." : "Save Note"}</span>
+        <span>{loading ? "Saving..." : "Save Note"} </span>
       </button>
     </form>
   );

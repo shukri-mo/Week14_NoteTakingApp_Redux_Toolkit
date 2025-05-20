@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { Navigate } from "react-router-dom";
 //STEP1 I CREATED THE FETCH AND CREATE THUNK
 const BASE_URL = "http://localhost:3001/api/notes";
 export const fetchNotes = createAsyncThunk(
@@ -44,10 +45,16 @@ const initialState = {
   notes: [],
   loading: false,
   error: null,
+  createStatus:'idle',
 };
 const noteSlice = createSlice({
   initialState,
   name: "notes",
+  reducers:{
+    resetCreateReducer(state){
+state.createStatus='idle'
+    }
+  },
   extraReducers: (builder) => {
     //FETCHING NOTES
     builder
@@ -68,12 +75,15 @@ const noteSlice = createSlice({
       .addCase(createNote.fulfilled, (state, action) => {
         state.notes.push(action.payload);
         state.loading = false;
+   state.createStatus="success";
       })
       .addCase(createNote.pending, (state) => {
         state.loading = true;
+        state.createStatus='loading'
       })
       .addCase(createNote.rejected, (state, action) => {
         state.loading = false;
+        state.createStatus='error'
         state.error = action.payload;
       });
 
@@ -89,5 +99,5 @@ builder.addCase(deleteNote.fulfilled,(state,action)=>{
 
 
 
-
+export const {resetCreateReducer}=noteSlice.actions;
 export default noteSlice.reducer;

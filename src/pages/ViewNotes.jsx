@@ -3,19 +3,22 @@ import NoteCard from "../components/NoteCard";
 import { fetchNotes } from "../Store/noteSlice";
 import { StickyNote, Trash2 } from "lucide-react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteNote } from "../Store/noteSlice";
 const ViewNotes = () => {
+  const navigate=useNavigate()
   const dispatch = useDispatch();
   const notes=useSelector(state=>state.notes.notes)
 const loading=useSelector(state=>state.notes.loading)
 const error=useSelector(state=>state.notes.error)
-
   //FETCHING DATA
   useEffect(() => {
+   
     dispatch(fetchNotes());
+  
   }, []);
+
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this note?")) {
